@@ -7,7 +7,7 @@ MyRedis::MyRedis(bool enablePersistence) : isEnablePersistence(enablePersistence
     lastCleanupTime = chrono::system_clock::now(); 
 }
 
-void MyRedis::set(const std::string& key, int value, chrono::seconds expiration) {
+void MyRedis::set(const string& key, int value, chrono::seconds expiration) {
     lock_guard<mutex> lock(mtx);
     data[key] = make_pair(value, chrono::system_clock::now() + expiration);
     if (isEnablePersistence)
@@ -19,7 +19,7 @@ void MyRedis::set(const std::string& key, int value, chrono::seconds expiration)
     }
 }
 
-int MyRedis::get(const std::string& key) {
+int MyRedis::get(const string& key) {
     lock_guard<mutex> lock(mtx);
     auto it = data.find(key);
     if (it != data.end()) {
