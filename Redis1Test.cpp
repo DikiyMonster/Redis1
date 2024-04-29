@@ -7,7 +7,7 @@ using namespace std;
 void testRedis() {
     MyRedis redis;
 
-    auto setFunc = [&redis](const std::string& key, int value, chrono::seconds expiration) {
+    auto setFunc = [&redis](const string& key, int value, chrono::seconds expiration) {
         redis.set(key, value, expiration);
         };
 
@@ -26,7 +26,7 @@ void testRedis() {
     t3.join();
     t4.join();
 
-    this_thread::sleep_for(std::chrono::seconds(8)); 
+    this_thread::sleep_for(chrono::seconds(8)); 
 
     int value_key1 = getFunc("key1");
     int value_key2 = getFunc("key2");
