@@ -1,13 +1,24 @@
-﻿#include "Redis1.h"
+#include "Redis1.h"
 #include <fstream>
+#include <thread>
 
 MyRedis::MyRedis(bool enablePersistence) : isEnablePersistence(enablePersistence) {
     if (isEnablePersistence)
         loadFromDisk();
-    lastCleanupTime = chrono::system_clock::now(); 
+    lastCleanupTime = chrono::system_clock::now();
+
+    cleanupThread = thread([this]() {
+        while (true) {
+            this_thread::sleep_for(chrono::minutes(1)); 
+            cleanup();
+        }
+        });
+}
+MyRedis::~ MyRedis() {
+    cleanupThread.join();
 }
 
-void MyRedis::set(const string& key, int value, chrono::seconds expiration) {
+void MyRedis::set(const std::string& key, int value, chrono::seconds expiration) {
     lock_guard<mutex> lock(mtx);
     data[key] = make_pair(value, chrono::system_clock::now() + expiration);
     if (isEnablePersistence)
@@ -19,7 +30,7 @@ void MyRedis::set(const string& key, int value, chrono::seconds expiration) {
     }
 }
 
-int MyRedis::get(const string& key) {
+int MyRedis::get(const std::string& key) {
     lock_guard<mutex> lock(mtx);
     auto it = data.find(key);
     if (it != data.end()) {
@@ -37,6 +48,7 @@ int MyRedis::get(const string& key) {
         return -1; 
     }
 }
+
 
 void MyRedis::saveToDisk() {
     ofstream file("redis_state.txt");
